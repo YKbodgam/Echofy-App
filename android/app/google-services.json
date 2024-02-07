@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1028356649112",
+    "firebase_url": "https://echofy-app-default-rtdb.firebaseio.com",
+    "project_id": "echofy-app",
+    "storage_bucket": "echofy-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028356649112:android:af17866279c9f7bef2a0ed",
+        "android_client_info": {
+          "package_name": "com.example.echofy_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1028356649112-u0d5bnhkt342ga94uq80qfo77jrokahu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.echofy_app",
+            "certificate_hash": "0441e8012ab638536daf2da612ae9afffac709bf"
+          }
+        },
+        {
+          "client_id": "1028356649112-4f7i4t0u49g3m4s26abjllq95oss0b01.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ3VIA_sb1GNEsbkIx27TLuLrYRVmffEs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1028356649112-4f7i4t0u49g3m4s26abjllq95oss0b01.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
