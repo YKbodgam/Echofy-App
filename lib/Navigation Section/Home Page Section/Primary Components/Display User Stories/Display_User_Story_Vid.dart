@@ -1,34 +1,35 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../Classes ( New ) Section/Create_New_Stories_Class.dart';
-import '../../../../Components Section/Image Loader Component/ImageErrorCont.dart';
-import '../../../../Components Section/Image Loader Component/ImageLoadingCont.dart';
-import '../../../../Authentication Section/Database_Authentication/Fetch From Database/Fetch_User_Body_Text.dart';
-
 import '../../../../User Section/Authenticate User Section/Get_User_Unique_name.dart';
 import '../../../../User Section/Fetch User Details Section/Fetch_User_Profile_Img.dart';
+import '../../../../Authentication Section/Database_Authentication/Fetch From Database/Fetch_User_Body_Text.dart';
 
-class PhotoDisplayScreen extends StatefulWidget {
+class VideoDisplayScreen extends StatefulWidget {
+  final Size size;
   final String userId;
   final Stories story;
-  final Size size;
+  final VideoPlayerController videoPlayerController;
 
-  const PhotoDisplayScreen({
+  const VideoDisplayScreen({
     super.key,
-    required this.size,
     required this.userId,
     required this.story,
+    required this.size,
+    required this.videoPlayerController,
   });
 
   @override
-  State<PhotoDisplayScreen> createState() => _PhotoDisplayScreenState();
+  State<VideoDisplayScreen> createState() => _VideoDisplayScreenState();
 }
 
-class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
+class _VideoDisplayScreenState extends State<VideoDisplayScreen> {
+  late VideoPlayerController _controller;
   late Size size;
 
   late String status = '';
@@ -40,6 +41,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
   void initState() {
     super.initState();
     size = widget.size;
+    _controller = widget.videoPlayerController;
 
     getUsername().then(
       (value) => getStatus(),
@@ -51,6 +53,7 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
   @override
   void dispose() {
     super.dispose();
+    _controller.dispose();
   }
 
   Future<void> getUsername() async {
@@ -60,15 +63,15 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
     });
   }
 
+  Future<void> getImage() async {
+    imgPath = await getProfileImg(widget.story.storyAuthorId);
+  }
+
   Future<void> getLocalPostBody() async {
     final lame = await getPostBody(widget.story.storyDescriptionId);
     setState(() {
       storyBody = lame;
     });
-  }
-
-  Future<void> getImage() async {
-    imgPath = await getProfileImg(widget.story.storyAuthorId);
   }
 
   Future<void> getStatus() async {
@@ -92,12 +95,6 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
         status = 'Available';
       });
     }
-  }
-
-  void like(Function callback) {
-    setState(() {
-      callback();
-    });
   }
 
   TimeOfDay parseTime(String timeString) {
@@ -145,19 +142,16 @@ class _PhotoDisplayScreenState extends State<PhotoDisplayScreen> {
         Positioned.fill(
           child: Container(
             padding: EdgeInsets.symmetric(
+              vertical: widget.story.storyContentRatio[0] == 'isfill'
+                  ? 0.0
+                  : size.height * 0.1,
               horizontal: widget.story.storyContentRatio[1] == 'width'
                   ? 0.0
                   : size.width * 0.05,
             ),
-            child: CachedNetworkImage(
-              imageUrl: widget.story.storyMediaUrl,
-              placeholder: (context, url) => buildLoadingContainer(),
-              errorWidget: (context, url, error) =>
-                  buildErrorContainer(), // Provide an appropriate error widget
-
-              fit: widget.story.storyContentRatio[0] == 'fill'
-                  ? BoxFit.fill
-                  : BoxFit.contain,
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
             ),
           ),
         ),

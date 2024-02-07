@@ -1,4 +1,4 @@
-import 'package:chewie/chewie.dart';
+import 'package:echofy_app/Navigation%20Section/Home%20Page%20Section/Primary%20Components/Display%20User%20Stories/Display_User_Story_Vid.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -22,7 +22,6 @@ class StoryScreen extends StatefulWidget {
 class _StoryScreenState extends State<StoryScreen>
     with SingleTickerProviderStateMixin {
   late PageController _pageController;
-  late ChewieController _chewieController;
   late AnimationController _animationController;
   late VideoPlayerController _videoPlayerController;
 
@@ -32,21 +31,15 @@ class _StoryScreenState extends State<StoryScreen>
   void initState() {
     super.initState();
 
+    _pageController = PageController();
+    _animationController = AnimationController(vsync: this);
+
     for (var element in widget.storylist) {
       element.onViewed(widget.userid);
     }
 
-    _pageController = PageController();
-    _animationController = AnimationController(vsync: this);
-
     final Stories firstStory = widget.storylist.first;
     _loadStory(story: firstStory, animateToPage: false);
-
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      looping: false,
-    );
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -96,14 +89,12 @@ class _StoryScreenState extends State<StoryScreen>
                           size: size, userId: widget.userid, story: story);
 
                     case 'Video':
-                      _videoPlayerController = VideoPlayerController.networkUrl(
-                        Uri.parse(story.storyMediaUrl),
-                      );
-
                       if (_videoPlayerController.value.isInitialized) {
-                        return FittedBox(
-                          fit: BoxFit.cover,
-                          child: Chewie(controller: _chewieController),
+                        return VideoDisplayScreen(
+                          userId: widget.userid,
+                          story: story,
+                          size: size,
+                          videoPlayerController: _videoPlayerController,
                         );
                       }
                   }
@@ -179,6 +170,15 @@ class _StoryScreenState extends State<StoryScreen>
     _animationController.stop();
     _animationController.reset();
 
+    try {
+      if (_videoPlayerController.value.isInitialized) {
+        _videoPlayerController.dispose();
+      }
+    } catch (e) {
+      // Handle any potential errors during disposal
+      print("Error disposing VideoPlayerController: $e");
+    }
+
     switch (story.storyMediaType) {
       case 'Image':
         _animationController.duration = const Duration(seconds: 6);
@@ -187,19 +187,20 @@ class _StoryScreenState extends State<StoryScreen>
         break;
 
       case 'Video':
-        _videoPlayerController.dispose();
-
         _videoPlayerController = VideoPlayerController.networkUrl(
           Uri.parse(story.storyMediaUrl),
-        )..initialize();
+        );
 
-        setState(() {});
+        _videoPlayerController.initialize().then(
+          (_) {
+            setState(() {}); // Trigger a rebuild
 
-        if (_videoPlayerController.value.isInitialized) {
-          _animationController.duration = _videoPlayerController.value.duration;
-          _videoPlayerController.play();
-          _animationController.forward();
-        }
+            _animationController.duration =
+                _videoPlayerController.value.duration;
+            _videoPlayerController.play();
+            _animationController.forward();
+          },
+        );
 
         break;
     }
@@ -260,7 +261,7 @@ class animatedBar extends StatelessWidget {
 
   Container _buildcontainer(double width, Color color) {
     return Container(
-      height: 5.0,
+      height: 3.0,
       width: width,
       decoration: BoxDecoration(
         color: color,

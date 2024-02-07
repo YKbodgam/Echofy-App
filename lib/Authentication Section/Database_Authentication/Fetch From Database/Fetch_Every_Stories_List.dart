@@ -39,30 +39,17 @@ Future<List<dynamic>> getallStories(String userId) async {
     });
   }
 
-  // Helper function to check if a DateTime is within the last 24 hours
+// Helper function to check if a DateTime is within the last 24 hours
   bool isWithin24Hours(DateTime dateTime) {
     DateTime currentDateTime = DateTime.now();
     Duration difference = currentDateTime.difference(dateTime);
     return difference.inHours <= 24;
   }
 
-  // Step 2: Sort all the stories according to their postedTime where more recent are at the top
-  originalList.sort((a, b) {
-    DateTime aDateTime = parseDateTime(a.storyDate, a.storyTime);
-    DateTime bDateTime = parseDateTime(b.storyDate, b.storyTime);
-
-    bool isAWithin24Hours = isWithin24Hours(aDateTime);
-    bool isBWithin24Hours = isWithin24Hours(bDateTime);
-
-    if (isAWithin24Hours && isBWithin24Hours) {
-      return bDateTime.compareTo(aDateTime);
-    } else if (isAWithin24Hours) {
-      return -1;
-    } else if (isBWithin24Hours) {
-      return 1;
-    } else {
-      return bDateTime.compareTo(aDateTime);
-    }
+// Step 3: Remove stories older than 24 hours from the originalList
+  originalList.removeWhere((story) {
+    DateTime storyDateTime = parseDateTime(story.storyDate, story.storyTime);
+    return !isWithin24Hours(storyDateTime);
   });
 
   // Step 3: Group stories by writer
